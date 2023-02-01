@@ -2,10 +2,6 @@
 requires = [
 	"flit_core >=3.2,<4",
 	"python_version >= '3.8.16'",
-	"numpy",
-	"scipy",
-	"matplotlib",
-	"scikit-learn"
 	]
 build-backend = "flit_core.buildapi"
 
@@ -17,5 +13,9 @@ readme = "README.md"
 license = {file = "LICENSE"}
 classifiers = ["License :: OSI Approved :: MIT License"]
 dynamic = ["version", "description"]
-dependencies = ["pytest", 'networkx'
+dependencies = ["pytest", 'networkx', 
+	"numpy",
+	"scipy",
+	"matplotlib",
+	"scikit-learn"
 ]
