@@ -4,7 +4,8 @@ requires = [
 	"python_version >= '3.8.16'",
 	"numpy",
 	"scipy",
-	"matplotlib"
+	"matplotlib",
+	"sklearn"
 	]
 build-backend = "flit_core.buildapi"
 
