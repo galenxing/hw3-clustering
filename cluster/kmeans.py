@@ -3,7 +3,7 @@ from scipy.spatial.distance import cdist
 
 
 class KMeans:
-    def __init__(self, k: int, tol: float = 1e-6, max_iter: int = 100):
+    def __init__(self, k: int, tol: float = 1e-6, max_iter: int = 100, seed: int = 5):
         """
         In this method you should initialize whatever attributes will be required for the class.
 
@@ -20,6 +20,15 @@ class KMeans:
             max_iter: int
                 the maximum number of iterations before quitting model fit
         """
+        if k>0:
+            self.k = k
+        else:
+            raise ValueError('k needs to be greater than 0.')
+            
+        self.tol = tol
+        self.max_iter = max_iter
+        np.random.seed(seed)        
+        
 
     def fit(self, mat: np.ndarray):
         """
@@ -37,6 +46,48 @@ class KMeans:
                 A 2D matrix where the rows are observations and columns are features
         """
 
+
+        maxes = np.max(mat,axis=0)
+        normed = mat/maxes
+
+        ass = np.random.randint(0, self.k, normed.shape[0])
+
+        q=0
+        sse_prev = np.inf
+        err = np.inf
+        sse_diff = np.inf
+        
+        while (q < self.max_iter) and (sse_diff > self.tol):
+            centers = []
+            for i in range(self.k):
+                cluster = normed[ass == i]
+                centers.append(np.mean(cluster, axis=0))
+
+            tmp_centers = []
+            for center in centers:
+                if np.isnan(center).any():
+                    tmp_centers.append(np.random.random(mat.shape[1]))
+                else:
+                    tmp_centers.append(center)
+
+            centers = np.array(tmp_centers)
+
+            ass = np.argmin(cdist(normed,np.array(centers)),axis=1)
+            
+            sse = 0
+            for i in range(self.k):
+                cluster = mat[ass == i]
+                sse += np.sum((cluster - centers[i]*maxes)**2)
+            sse = sse/mat.shape[0]
+            
+#             sse_diff = sse_prev-sse
+            sse_prev = sse
+
+            q+=1
+            
+        self.error = sse
+        self.centers = centers * maxes
+
     def predict(self, mat: np.ndarray) -> np.ndarray:
         """
         Predicts the cluster labels for a provided matrix of data points--
@@ -53,6 +104,7 @@ class KMeans:
             np.ndarray
                 a 1D array with the cluster label for each of the observations in `mat`
         """
+        return np.argmin(cdist(mat,self.centers),axis=1)
 
     def get_error(self) -> float:
         """
@@ -63,6 +115,7 @@ class KMeans:
             float
                 the squared-mean error of the fit model
         """
+        return self.error
 
     def get_centroids(self) -> np.ndarray:
         """
@@ -72,3 +125,5 @@ class KMeans:
             np.ndarray
                 a `k x m` 2D matrix representing the cluster centroids of the fit model
         """
+        return self.centers
+        
